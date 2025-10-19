@@ -21,6 +21,13 @@ function reducer(state, {type, payload}) {
       if(payload.digit == '.' && state.currentOperand!= null && state.currentOperand.includes('.')) {
         return state
       }
+      if(state.overwrite) {
+        return {
+          ...state,
+          overwrite: false,
+          currentOperand: payload.digit
+        }
+      }
       return {
         ...state,
         currentOperand: `${state.currentOperand || ''}${payload.digit}`
@@ -58,6 +65,19 @@ function reducer(state, {type, payload}) {
 
     case ACTIONS.CLEAR:
       return {}
+
+    case ACTIONS.EVALUATE:
+      if (state.currentOperand == null || state.previousOperand == null || state.operation == null) {
+        return state
+      }
+
+      return {
+        ...state,
+        overwrite: true,
+        currentOperand: evaluate(state),
+        previousOperand: null,
+        operation: null
+      }
 
     default:
       break;
@@ -123,7 +143,7 @@ function App() {
     <OperationButton dispatch={dispatch} operation='-'/>
     <DigitButton dispatch={dispatch} digit="."/>
     <DigitButton dispatch={dispatch} digit={0}/>
-    <button className="span-two">=</button>
+    <button className="span-two" onClick={() => dispatch({type: ACTIONS.EVALUATE})}>=</button>
   </div>
 }
 
